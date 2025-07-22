@@ -185,8 +185,8 @@ class UserManagement extends Component
     public function closeModal()
     {
         Flux::modal('create-user')->close();
-        $this->showEditModal = false;
-        $this->showDeleteModal = false;
+        Flux::modal('delete-user-{{ $selectedUser->id }}')->close();
+        Flux::modal('edit-user-{{ $selectedUser->id }}')->close();
         $this->resetForm();
     }
 

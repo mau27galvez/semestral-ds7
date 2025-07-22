@@ -144,237 +144,153 @@
 
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex items-center space-x-2">
-                                    <flux:tooltip content="{{ __('Edit User') }}">
-                                        <flux:button wire:click="editUser({{ $user->id }})"
-                                            class="text-indigo-600 hover:text-indigo-900 p-1">
-                                            <flux:icon.pencil class="w-4 h-4" />
-                                        </flux:button>
-                                    </flux:tooltip>
-
-                                    @if ($user->id !== auth()->id())
-                                        <flux:tooltip content="{{ __('Delete User') }}">
-                                            <flux:button wire:click="confirmDelete({{ $user->id }})"
-                                                class="text-red-600 hover:text-red-900 p-1">
-                                                <flux:icon.trash class="w-4 h-4" />
-                                            </flux:button>
+                                    <flux:modal.trigger name="edit-user-{{ $user->id }}">
+                                        <flux:tooltip content="{{ __('Edit User') }}">
+                                            <flux:button icon="pencil" />
                                         </flux:tooltip>
-                                    @endif
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="px-6 py-12 text-center">
-                                <div class="text-gray-500 dark:text-gray-400">
-                                    @if ($search)
-                                        {{ __('No users found matching ":search"', ['search' => $search]) }}
-                                    @else
-                                        {{ __('No users found.') }}
-                                    @endif
-                                </div>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+                                    </flux:modal.trigger>
 
-        {{-- Pagination --}}
-        @if ($this->users->hasPages())
-            <div class="px-6 py-3 border-t border-gray-200 dark:border-gray-700">
-                {{ $this->users->links() }}
-            </div>
-        @endif
+                                    {{-- Edit User Modal --}}
+                                    <flux:modal name="edit-user-{{ $user->id }}" class="w-full max-w-xl">
+                                        <form wire:submit="updateUser">
+                                            <div class="space-y-6">
+                                                <div>
+                                                    <flux:heading size="lg">
+                                                        {{ __('Edit User') }}
+                                                    </flux:heading>
+                                                    <flux:text class="mt-2">
+                                                        {{ __('Update user information.') }}
+                                                    </flux:text>
+                                                </div>
+
+                                                <div class="space-y-4">
+                                                    <flux:input wire:model="name" :label="__('Name')" />
+
+                                                    <flux:input wire:model="email" :label="__('Email')" />
+
+                                                    <flux:input wire:model="password" :label="__('New Password')"
+                                                        type="password" />
+
+                                                    <flux:input wire:model="password_confirmation"
+                                                        :label="__('Confirm New Password')" type="password" />
+
+                                                    <flux:text class="mt-2">
+                                                        {{ __('Leave blank to keep the current password.') }}
+                                                    </flux:text>
+                                                </div>
+
+                                                <div class="flex gap-3 justify-end">
+                                                    <flux:modal.close>
+                                                        <flux:button variant="ghost">
+                                                            {{ __('Cancel') }}
+                                                        </flux:button>
+                                                    </flux:modal.close>
+
+                                                    <flux:button type="submit" wire:loading.attr="disabled"
+                                                        wire:target="updateUser" variant="primary">
+                                                        {{ __('Update User') }}
+                                                    </flux:button>
+                                                </div>
+                                        </form>
+                                </div>
+                                </form>
+                                </flux:modal>
+
+                                @if ($user->id !== auth()->id())
+                                    <flux:modal.trigger name="delete-user-{{ $user->id }}">
+                                        <flux:tooltip content="{{ __('Delete User') }}">
+                                            <flux:button variant="danger" icon="trash" />
+                                        </flux:tooltip>
+                                    </flux:modal.trigger>
+
+                                    <flux:modal name="delete-user-{{ $user->id }}" class="min-w-[22rem]">
+                                        <div class="space-y-6">
+                                            <div>
+                                                <flux:heading size="lg">Delete user?</flux:heading>
+                                                <flux:text class="mt-2">
+                                                    <p>You're about to delete the user {{ $user->name }}.</p>
+                                                    <p>This action cannot be reversed.</p>
+                                                </flux:text>
+                                            </div>
+                                            <div class="flex gap-2">
+                                                <flux:spacer />
+                                                <flux:modal.close>
+                                                    <flux:button variant="ghost">Cancel</flux:button>
+                                                </flux:modal.close>
+                                                <flux:button type="submit" variant="danger"
+                                                    wire:click="deleteUser({{ $user->id }})">
+                                                    Delete user
+                                                </flux:button>
+                                            </div>
+                                        </div>
+                                    </flux:modal>
+                                @endif
+        </div>
+        </td>
+        </tr>
+    @empty
+        <tr>
+            <td colspan="5" class="px-6 py-12 text-center">
+                <div class="text-gray-500 dark:text-gray-400">
+                    @if ($search)
+                        {{ __('No users found matching ":search"', ['search' => $search]) }}
+                    @else
+                        {{ __('No users found.') }}
+                    @endif
+                </div>
+            </td>
+        </tr>
+        @endforelse
+        </tbody>
+        </table>
     </div>
 
-    {{-- Create User Modal --}}
-    <flux:modal name="create-user" class="w-full max-w-xl">
-        <form wire:submit="storeUser">
-            <div class="space-y-6">
-                <div>
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">
-                        {{ __('Create New User') }}</h3>
-                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                        {{ __('Add a new user to the system.') }}</p>
-                </div>
-
-                <div class="space-y-4">
-                    <flux:input wire:model="name" :label="__('Name')" />
-
-                    <flux:input wire:model="email" :label="__('Email')" />
-
-                    <flux:input wire:model="password" :label="__('Password')" type="password" />
-
-                    <flux:input wire:model="password_confirmation" :label="__('Confirm Password')" type="password" />
-                </div>
-
-                <div class="flex gap-3 justify-end">
-                    <flux:button type="button" wire:click="closeModal" variant="ghost">
-                        {{ __('Cancel') }}
-                    </flux:button>
-
-                    <flux:button type="submit" wire:loading.attr="disabled" wire:target="storeUser"
-                        variant="primary">
-                        <span wire:loading.remove wire:target="storeUser">
-                            {{ __('Create User') }}
-                        </span>
-                        <span wire:loading wire:target="storeUser" class="flex items-center">
-                            <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2">
-                            </div>
-                            {{ __('Creating...') }}
-                        </span>
-                    </flux:button>
-                </div>
-            </div>
-        </form>
-    </flux:modal>
-
-    {{-- Edit User Modal --}}
-    @if ($showEditModal)
-        <flux:modal name="edit-user" class="w-full max-w-xl">
-            <form wire:submit="updateUser">
-                <div class="space-y-6">
-                    <div>
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ __('Edit User') }}
-                        </h3>
-                        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                            {{ __('Update user information.') }}</p>
-                    </div>
-
-                    <div
-                        class="relative inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
-                        <form wire:submit="updateUser">
-                            <div class="space-y-6">
-                                <div>
-                                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">
-                                        {{ __('Edit User') }}
-                                    </h3>
-                                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                                        {{ __('Update user information.') }}</p>
-                                </div>
-
-                                <div class="space-y-4">
-                                    <div>
-                                        <label
-                                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('Name') }}</label>
-                                        <input wire:model="name" type="text"
-                                            placeholder="{{ __('Enter user name') }}"
-                                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" />
-                                        @error('name')
-                                            <span class="text-red-500 text-sm">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-
-                                    <div>
-                                        <label
-                                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('Email') }}</label>
-                                        <input wire:model="email" type="email"
-                                            placeholder="{{ __('Enter email address') }}"
-                                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" />
-                                        @error('email')
-                                            <span class="text-red-500 text-sm">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-
-                                    <div>
-                                        <label
-                                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('New Password') }}</label>
-                                        <input wire:model="password" type="password"
-                                            placeholder="{{ __('Leave blank to keep current password') }}"
-                                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" />
-                                        @error('password')
-                                            <span class="text-red-500 text-sm">{{ $message }}</span>
-                                        @enderror
-                                        <p class="mt-1 text-sm text-gray-500">
-                                            {{ __('Leave blank to keep the current password.') }}</p>
-                                    </div>
-
-                                    <div>
-                                        <label
-                                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('Confirm New Password') }}</label>
-                                        <input wire:model="password_confirmation" type="password"
-                                            placeholder="{{ __('Confirm new password') }}"
-                                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" />
-                                        @error('password_confirmation')
-                                            <span class="text-red-500 text-sm">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-                                </div>
-
-                                <div class="flex gap-3 justify-end">
-                                    <flux:button type="button" wire:click="closeModal"
-                                        class="bg-gray-200 hover:bg-gray-300 text-gray-900">
-                                        {{ __('Cancel') }}
-                                    </flux:button>
-
-                                    <flux:button type="submit" wire:loading.attr="disabled" wire:target="updateUser"
-                                        class="bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50">
-                                        <span wire:loading.remove wire:target="updateUser">
-                                            {{ __('Update User') }}
-                                        </span>
-                                        <span wire:loading wire:target="updateUser" class="flex items-center">
-                                            <div
-                                                class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2">
-                                            </div>
-                                            {{ __('Updating...') }}
-                                        </span>
-                                    </flux:button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </form>
-        </flux:modal>
-    @endif
-
-    {{-- Delete Confirmation Modal --}}
-    @if ($showDeleteModal)
-        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog"
-            aria-modal="true">
-            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" wire:click="closeModal"></div>
-
-                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-                <div
-                    class="relative inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
-                    <div class="space-y-6">
-                        <div>
-                            <h3 class="text-lg font-medium text-red-600">{{ __('Delete User') }}</h3>
-                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                                {{ __('This action cannot be undone.') }}</p>
-                        </div>
-
-                        @if ($selectedUser)
-                            <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
-                                <p class="text-sm text-red-800 dark:text-red-200">
-                                    {{ __('Are you sure you want to delete :name? This will permanently remove the user and all associated data.', ['name' => $selectedUser->name]) }}
-                                </p>
-                            </div>
-                        @endif
-
-                        <div class="flex gap-3 justify-end">
-                            <flux:button type="button" wire:click="closeModal"
-                                class="bg-gray-200 hover:bg-gray-300 text-gray-900">
-                                {{ __('Cancel') }}
-                            </flux:button>
-
-                            <flux:button wire:click="deleteUser" wire:loading.attr="disabled"
-                                wire:target="deleteUser"
-                                class="bg-red-600 hover:bg-red-700 text-white disabled:opacity-50">
-                                <span wire:loading.remove wire:target="deleteUser">
-                                    {{ __('Delete User') }}
-                                </span>
-                                <span wire:loading wire:target="deleteUser" class="flex items-center">
-                                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                                    {{ __('Deleting...') }}
-                                </span>
-                            </flux:button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    {{-- Pagination --}}
+    @if ($this->users->hasPages())
+        <div class="px-6 py-3 border-t border-gray-200 dark:border-gray-700">
+            {{ $this->users->links() }}
         </div>
     @endif
+</div>
+
+{{-- Create User Modal --}}
+<flux:modal name="create-user" class="w-full max-w-xl">
+    <form wire:submit="storeUser">
+        <div class="space-y-6">
+            <div>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                    {{ __('Create New User') }}</h3>
+                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                    {{ __('Add a new user to the system.') }}</p>
+            </div>
+
+            <div class="space-y-4">
+                <flux:input wire:model="name" :label="__('Name')" />
+
+                <flux:input wire:model="email" :label="__('Email')" />
+
+                <flux:input wire:model="password" :label="__('Password')" type="password" />
+
+                <flux:input wire:model="password_confirmation" :label="__('Confirm Password')" type="password" />
+            </div>
+
+            <div class="flex gap-3 justify-end">
+                <flux:button type="button" wire:click="closeModal" variant="ghost">
+                    {{ __('Cancel') }}
+                </flux:button>
+
+                <flux:button type="submit" wire:loading.attr="disabled" wire:target="storeUser" variant="primary">
+                    <span wire:loading.remove wire:target="storeUser">
+                        {{ __('Create User') }}
+                    </span>
+                    <span wire:loading wire:target="storeUser" class="flex items-center">
+                        <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2">
+                        </div>
+                        {{ __('Creating...') }}
+                    </span>
+                </flux:button>
+            </div>
+        </div>
+    </form>
+</flux:modal>
 </div>
