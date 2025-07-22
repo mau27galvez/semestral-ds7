@@ -10,17 +10,22 @@ use Livewire\Attributes\Rule;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\Auth;
+use Flux\Flux;
 
 class UserManagement extends Component
 {
     use WithPagination, AuthorizesRequests;
 
-    public bool $showCreateModal = false;
     public bool $showEditModal = false;
     public bool $showDeleteModal = false;
 
     public ?User $selectedUser = null;
     public string $search = '';
+
+    // Livewire-native message handling
+    public string $successMessage = '';
+    public string $errorMessage = '';
 
     // User form properties
     #[Validate('required|string|max:255')]
@@ -65,7 +70,7 @@ class UserManagement extends Component
         $this->authorize('create', User::class);
 
         $this->resetForm();
-        $this->showCreateModal = true;
+        Flux::modal('create-user')->show();
     }
 
     public function storeUser()
@@ -86,11 +91,15 @@ class UserManagement extends Component
             'email_verified_at' => now(), // Auto-verify for admin created users
         ]);
 
-        $this->showCreateModal = false;
+        Flux::modal('create-user')->close();
         $this->resetForm();
 
-        session()->flash('message', 'User created successfully!');
-        $this->dispatch('user-created');
+        // Livewire-native success message
+        $this->successMessage = "User '{$this->name}' created successfully!";
+        $this->clearMessagesAfterDelay();
+
+        // Dispatch event for potential listeners
+        $this->dispatch('user-created', name: $this->name);
     }
 
     public function editUser(User $user)
@@ -127,13 +136,17 @@ class UserManagement extends Component
             $data['password'] = Hash::make($this->password);
         }
 
+        $userName = $this->selectedUser->name;
         $this->selectedUser->update($data);
 
         $this->showEditModal = false;
         $this->resetForm();
 
-        session()->flash('message', 'User updated successfully!');
-        $this->dispatch('user-updated');
+        // Livewire-native success message
+        $this->successMessage = "User '{$userName}' updated successfully!";
+        $this->clearMessagesAfterDelay();
+
+        $this->dispatch('user-updated', name: $userName);
     }
 
     public function confirmDelete(User $user)
@@ -149,27 +162,44 @@ class UserManagement extends Component
         $this->authorize('delete', $this->selectedUser);
 
         // Prevent self-deletion
-        if ($this->selectedUser->id === auth()->id()) {
-            session()->flash('error', 'You cannot delete your own account!');
+        if ($this->selectedUser->id === Auth::id()) {
+            $this->errorMessage = 'You cannot delete your own account!';
             $this->showDeleteModal = false;
+            $this->clearMessagesAfterDelay();
             return;
         }
 
+        $userName = $this->selectedUser->name;
         $this->selectedUser->delete();
 
         $this->showDeleteModal = false;
         $this->selectedUser = null;
 
-        session()->flash('message', 'User deleted successfully!');
-        $this->dispatch('user-deleted');
+        // Livewire-native success message
+        $this->successMessage = "User '{$userName}' deleted successfully!";
+        $this->clearMessagesAfterDelay();
+
+        $this->dispatch('user-deleted', name: $userName);
     }
 
     public function closeModal()
     {
-        $this->showCreateModal = false;
+        Flux::modal('create-user')->close();
         $this->showEditModal = false;
         $this->showDeleteModal = false;
         $this->resetForm();
+    }
+
+    public function clearMessages()
+    {
+        $this->successMessage = '';
+        $this->errorMessage = '';
+    }
+
+    private function clearMessagesAfterDelay()
+    {
+        // Auto-clear messages after 5 seconds using Alpine.js
+        $this->dispatch('message-shown');
     }
 
     private function resetForm()
@@ -180,11 +210,14 @@ class UserManagement extends Component
         $this->password_confirmation = '';
         $this->selectedUser = null;
         $this->resetErrorBag();
+
+        // Clear any existing messages when resetting
+        $this->clearMessages();
     }
 
     public function render()
     {
         return view('livewire.user-management')
-            ->title('User Management');
+            ->name('User Management');
     }
 }
