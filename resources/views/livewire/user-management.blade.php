@@ -149,7 +149,7 @@
 
                                     {{-- Edit User Modal --}}
                                     <flux:modal name="edit-user-{{ $user->id }}" class="w-full max-w-xl">
-                                        <form wire:submit="updateUser">
+                                        <form wire:submit="updateUser({{ $user->id }})">
                                             <div class="space-y-6">
                                                 <div>
                                                     <flux:heading size="lg">
@@ -161,14 +161,16 @@
                                                 </div>
 
                                                 <div class="space-y-4">
-                                                    <flux:input wire:model="name" :label="__('Name')" />
+                                                    <flux:input wire:model="updateUserForm.name"
+                                                        :label="__('Name')" />
 
-                                                    <flux:input wire:model="email" :label="__('Email')" />
+                                                    <flux:input wire:model="updateUserForm.email"
+                                                        :label="__('Email')" />
 
-                                                    <flux:input wire:model="password" :label="__('New Password')"
-                                                        type="password" />
+                                                    <flux:input wire:model="updateUserForm.password"
+                                                        :label="__('New Password')" type="password" />
 
-                                                    <flux:input wire:model="password_confirmation"
+                                                    <flux:input wire:model="updateUserForm.password_confirmation"
                                                         :label="__('Confirm New Password')" type="password" />
 
                                                     <flux:text class="mt-2">

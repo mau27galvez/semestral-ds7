@@ -12,6 +12,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 use Flux\Flux;
+use App\Livewire\Forms\UpdateUserForm;
 
 class UserManagement extends Component
 {
@@ -31,7 +32,7 @@ class UserManagement extends Component
     #[Validate('required|string|max:255')]
     public string $name = '';
 
-    #[Validate('required|string|email|max:255')]
+    #[Validate('required|string|email|max:255|unique:users,email')]
     public string $email = '';
 
     #[Validate('nullable|string|min:8|confirmed')]
@@ -39,6 +40,8 @@ class UserManagement extends Component
 
     #[Validate('nullable|string|min:8')]
     public string $password_confirmation = '';
+
+    public UpdateUserForm $updateUserForm;
 
     public function mount()
     {
@@ -102,42 +105,26 @@ class UserManagement extends Component
         $this->dispatch('user-created', name: $this->name);
     }
 
-    public function editUser(User $user)
+    public function updateUser($userId)
     {
+        $this->updateUserForm->id = $userId;
+        $this->updateUserForm->validate();
+
+        $user = User::findOrFail($this->updateUserForm->id);
         $this->authorize('update', $user);
 
-        $this->selectedUser = $user;
-        $this->name = $user->name;
-        $this->email = $user->email;
-        $this->password = '';
-        $this->password_confirmation = '';
-
-        $this->showEditModal = true;
-    }
-
-    public function updateUser()
-    {
-        $this->authorize('update', $this->selectedUser);
-
-        // Add unique email validation excluding current user
-        $this->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $this->selectedUser->id,
-            'password' => 'nullable|string|min:8|confirmed',
-        ]);
-
         $data = [
-            'name' => $this->name,
-            'email' => $this->email,
+            'name' => $this->updateUserForm->name,
+            'email' => $this->updateUserForm->email,
         ];
 
         // Only update password if provided
-        if (!empty($this->password)) {
-            $data['password'] = Hash::make($this->password);
+        if (!empty($this->updateUserForm->password)) {
+            $data['password'] = Hash::make($this->updateUserForm->password);
         }
 
-        $userName = $this->selectedUser->name;
-        $this->selectedUser->update($data);
+        $userName = $user->name;
+        $user->update($data);
 
         $this->showEditModal = false;
         $this->resetForm();
@@ -149,31 +136,20 @@ class UserManagement extends Component
         $this->dispatch('user-updated', name: $userName);
     }
 
-    public function confirmDelete(User $user)
+    public function deleteUser($userId)
     {
+        $user = User::findOrFail($userId);
         $this->authorize('delete', $user);
 
-        $this->selectedUser = $user;
-        $this->showDeleteModal = true;
-    }
-
-    public function deleteUser()
-    {
-        $this->authorize('delete', $this->selectedUser);
-
         // Prevent self-deletion
-        if ($this->selectedUser->id === Auth::id()) {
+        if ($user->id === Auth::id()) {
             $this->errorMessage = 'You cannot delete your own account!';
-            $this->showDeleteModal = false;
             $this->clearMessagesAfterDelay();
             return;
         }
 
-        $userName = $this->selectedUser->name;
-        $this->selectedUser->delete();
-
-        $this->showDeleteModal = false;
-        $this->selectedUser = null;
+        $userName = $user->name;
+        $user->delete();
 
         // Livewire-native success message
         $this->successMessage = "User '{$userName}' deleted successfully!";
@@ -208,6 +184,10 @@ class UserManagement extends Component
         $this->email = '';
         $this->password = '';
         $this->password_confirmation = '';
+
+        // Reset the UpdateUserForm
+        $this->updateUserForm->reset();
+
         $this->selectedUser = null;
         $this->resetErrorBag();
 
