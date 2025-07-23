@@ -68,8 +68,8 @@
     {{-- Users Table --}}
     <div class="bg-white dark:bg-gray-800 shadow overflow-hidden rounded-lg">
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead class="bg-gray-50 dark:bg-gray-700">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-zinc-700">
+                <thead class="bg-gray-50 dark:bg-zinc-700">
                     <tr>
                         <th
                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -93,9 +93,9 @@
                         </th>
                     </tr>
                 </thead>
-                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody class="bg-white dark:bg-zinc-800 divide-y divide-gray-200 dark:divide-zinc-700">
                     @forelse ($this->users as $user)
-                        <tr wire:key="user-{{ $user->id }}" class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <tr wire:key="user-{{ $user->id }}" class="hover:bg-gray-50 dark:hover:bg-zinc-700">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0 h-10 w-10">
@@ -109,10 +109,9 @@
                                             {{ $user->name }}
                                         </div>
                                         @if ($user->id === auth()->id())
-                                            <span
-                                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-800 dark:text-indigo-200">
+                                            <flux:badge color="indigo">
                                                 {{ __('You') }}
-                                            </span>
+                                            </flux:badge>
                                         @endif
                                     </div>
                                 </div>
@@ -130,15 +129,13 @@
 
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if ($user->email_verified_at)
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200">
+                                    <flux:badge color="lime">
                                         {{ __('Verified') }}
-                                    </span>
+                                    </flux:badge>
                                 @else
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200">
+                                    <flux:badge color="yellow">
                                         {{ __('Unverified') }}
-                                    </span>
+                                    </flux:badge>
                                 @endif
                             </td>
 
