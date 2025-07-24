@@ -128,7 +128,17 @@
                             </td>
 
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                                {{ $newsItem->author }}
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-6 w-6">
+                                        <div
+                                            class="h-6 w-6 rounded-full bg-indigo-500 flex items-center justify-center text-white font-medium text-xs">
+                                            {{ $newsItem->author->initials() }}
+                                        </div>
+                                    </div>
+                                    <div class="ml-2">
+                                        {{ $newsItem->author->name }}
+                                    </div>
+                                </div>
                             </td>
 
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
@@ -185,8 +195,17 @@
                                                         <flux:input wire:model="updateNewsForm.title"
                                                             :label="__('Title')" />
 
-                                                        <flux:input wire:model="updateNewsForm.author"
-                                                            :label="__('Author')" />
+                                                        <flux:select wire:model="updateNewsForm.author_id"
+                                                            :label="__('Author')">
+                                                            @foreach ($this->users as $user)
+                                                                <flux:select.option value="{{ $user->id }}">
+                                                                    {{ $user->name }}
+                                                                    @if ($user->id === auth()->id())
+                                                                        ({{ __('You') }})
+                                                                    @endif
+                                                                </flux:select.option>
+                                                            @endforeach
+                                                        </flux:select>
 
                                                         <flux:select wire:model="updateNewsForm.category_id"
                                                             :label="__('Category')">
@@ -320,7 +339,16 @@
                     <div class="space-y-4">
                         <flux:input wire:model="title" :label="__('Title')" />
 
-                        <flux:input wire:model="author" :label="__('Author')" />
+                        <flux:select wire:model="author_id" :label="__('Author')">
+                            @foreach ($this->users as $user)
+                                <flux:select.option value="{{ $user->id }}">
+                                    {{ $user->name }}
+                                    @if ($user->id === auth()->id())
+                                        ({{ __('You') }})
+                                    @endif
+                                </flux:select.option>
+                            @endforeach
+                        </flux:select>
 
                         <flux:select wire:model="category_id" :label="__('Category')">
                             <flux:select.option value="">{{ __('Select Category') }}</flux:select.option>

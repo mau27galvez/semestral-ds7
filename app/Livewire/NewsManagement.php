@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\News;
 use App\Models\Category;
+use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Validate;
@@ -13,6 +14,7 @@ use Livewire\WithFileUploads;
 use Flux\Flux;
 use App\Livewire\Forms\UpdateNewsForm;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class NewsManagement extends Component
 {
@@ -35,8 +37,8 @@ class NewsManagement extends Component
     #[Validate('required|string')]
     public string $paragraph = '';
 
-    #[Validate('required|string|max:255')]
-    public string $author = '';
+    #[Validate('required|exists:users,id')]
+    public int $author_id = 0;
 
     public bool $is_published = false;
 
@@ -51,19 +53,24 @@ class NewsManagement extends Component
     {
         // Only users with specific permission can access news management
         $this->authorize('viewAny', News::class);
+
+        // Set default author to the currently authenticated user
+        $this->author_id = Auth::id();
     }
 
     #[Computed]
     public function news()
     {
         return News::query()
-            ->with('category')
+            ->with(['category', 'author'])
             ->when(
                 $this->search,
                 fn($query) =>
                 $query->where('title', 'like', '%' . $this->search . '%')
-                    ->orWhere('author', 'like', '%' . $this->search . '%')
                     ->orWhere('paragraph', 'like', '%' . $this->search . '%')
+                    ->orWhereHas('author', function ($q) {
+                        $q->where('name', 'like', '%' . $this->search . '%');
+                    })
             )
             ->orderBy('created_at', 'desc')
             ->paginate(10);
@@ -73,6 +80,12 @@ class NewsManagement extends Component
     public function categories()
     {
         return Category::orderBy('name')->get();
+    }
+
+    #[Computed]
+    public function users()
+    {
+        return User::orderBy('name')->get();
     }
 
     public function updatedSearch()
@@ -96,7 +109,7 @@ class NewsManagement extends Component
         $this->validate([
             'title' => 'required|string|max:255',
             'paragraph' => 'required|string',
-            'author' => 'required|string|max:255',
+            'author_id' => 'required|exists:users,id',
             'category_id' => 'required|exists:categories,id',
             'images' => 'required|array|min:3',
             'images.*' => 'image|max:2048',
@@ -116,7 +129,7 @@ class NewsManagement extends Component
         News::create([
             'title' => $this->title,
             'paragraph' => $this->paragraph,
-            'author' => $this->author,
+            'author_id' => $this->author_id,
             'is_published' => $this->is_published,
             'category_id' => $this->category_id,
             'images' => $imagePaths,
@@ -142,7 +155,7 @@ class NewsManagement extends Component
         $this->updateNewsForm->id = $news->id;
         $this->updateNewsForm->title = $news->title;
         $this->updateNewsForm->paragraph = $news->paragraph;
-        $this->updateNewsForm->author = $news->author;
+        $this->updateNewsForm->author_id = $news->author_id;
         $this->updateNewsForm->is_published = $news->is_published;
         $this->updateNewsForm->category_id = $news->category_id;
         $this->updateNewsForm->existing_images = $news->images ?? [];
@@ -171,7 +184,7 @@ class NewsManagement extends Component
         $data = [
             'title' => $this->updateNewsForm->title,
             'paragraph' => $this->updateNewsForm->paragraph,
-            'author' => $this->updateNewsForm->author,
+            'author_id' => $this->updateNewsForm->author_id,
             'is_published' => $this->updateNewsForm->is_published,
             'category_id' => $this->updateNewsForm->category_id,
             'images' => $allImages,
@@ -255,7 +268,7 @@ class NewsManagement extends Component
     {
         $this->title = '';
         $this->paragraph = '';
-        $this->author = '';
+        $this->author_id = Auth::id(); // Reset to current user
         $this->is_published = false;
         $this->category_id = 0;
         $this->images = [];

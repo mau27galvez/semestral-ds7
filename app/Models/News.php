@@ -19,7 +19,7 @@ class News extends Model
         'title',
         'paragraph',
         'images',
-        'author',
+        'author_id',
         'is_published',
         'category_id',
     ];
@@ -43,6 +43,14 @@ class News extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    /**
+     * Get the user that authored the news.
+     */
+    public function author()
+    {
+        return $this->belongsTo(User::class, 'author_id');
     }
 
     /**
