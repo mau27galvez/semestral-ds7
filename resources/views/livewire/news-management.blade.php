@@ -205,7 +205,7 @@
                                                         <div>
                                                             <flux:label>{{ __('Current Images') }}</flux:label>
                                                             <div class="mt-2 grid grid-cols-3 gap-2">
-                                                                @foreach ($newsItem->images as $index => $image)
+                                                                @foreach ($updateNewsForm->existing_images as $index => $image)
                                                                     <div class="relative">
                                                                         <img src="{{ Storage::url($image) }}"
                                                                             class="w-full h-20 object-cover rounded">
