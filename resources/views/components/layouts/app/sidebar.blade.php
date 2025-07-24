@@ -19,6 +19,12 @@
                     wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
                 <flux:navlist.item icon="users" :href="route('users.index')" :current="request()->routeIs('users.*')"
                     wire:navigate>{{ __('Users') }}</flux:navlist.item>
+                <flux:navlist.item icon="folder" :href="route('categories.index')"
+                    :current="request()->routeIs('categories.*')" wire:navigate>{{ __('Categories') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="newspaper" :href="route('news.index')" :current="request()->routeIs('news.*')"
+                    wire:navigate>{{ __('News') }}
+                </flux:navlist.item>
             </flux:navlist.group>
         </flux:navlist>
 
@@ -63,7 +69,8 @@
                 <flux:menu.separator />
 
                 <flux:menu.radio.group>
-                    <flux:menu.item :href="route('settings.profile')" icon="cog" wire:navigate>{{ __('Settings') }}
+                    <flux:menu.item :href="route('settings.profile')" icon="cog" wire:navigate>
+                        {{ __('Settings') }}
                     </flux:menu.item>
                 </flux:menu.radio.group>
 
@@ -110,7 +117,8 @@
                 <flux:menu.separator />
 
                 <flux:menu.radio.group>
-                    <flux:menu.item :href="route('settings.profile')" icon="cog" wire:navigate>{{ __('Settings') }}
+                    <flux:menu.item :href="route('settings.profile')" icon="cog" wire:navigate>
+                        {{ __('Settings') }}
                     </flux:menu.item>
                 </flux:menu.radio.group>
 

@@ -1,5 +1,7 @@
 <?php
 
+use App\Livewire\CategoryManagement;
+use App\Livewire\NewsManagement;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
@@ -23,6 +25,12 @@ Route::middleware(['auth'])->group(function () {
 
     // User Management
     Route::get('users', UserManagement::class)->name('users.index');
+
+    // Category Management
+    Route::get('categories', CategoryManagement::class)->name('categories.index');
+
+    // News Management
+    Route::get('news', NewsManagement::class)->name('news.index');
 });
 
 require __DIR__ . '/auth.php';
