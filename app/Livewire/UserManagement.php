@@ -35,6 +35,9 @@ class UserManagement extends Component
     #[Validate('required|string|email|max:255|unique:users,email')]
     public string $email = '';
 
+    #[Validate('required|in:admin,supervisor,editor,regular')]
+    public string $role = 'regular';
+
     #[Validate('nullable|string|min:8|confirmed')]
     public string $password = '';
 
@@ -63,6 +66,17 @@ class UserManagement extends Component
             ->paginate(10);
     }
 
+    #[Computed]
+    public function availableRoles()
+    {
+        return [
+            'regular' => 'Regular User',
+            'editor' => 'Editor',
+            'supervisor' => 'Supervisor',
+            'admin' => 'Administrator',
+        ];
+    }
+
     public function updatedSearch()
     {
         $this->resetPage();
@@ -84,12 +98,14 @@ class UserManagement extends Component
         $this->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
+            'role' => 'required|in:admin,supervisor,editor,regular',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
         User::create([
             'name' => $this->name,
             'email' => $this->email,
+            'role' => $this->role,
             'password' => Hash::make($this->password),
             'email_verified_at' => now(), // Auto-verify for admin created users
         ]);
@@ -114,6 +130,7 @@ class UserManagement extends Component
         $this->updateUserForm->id = $user->id;
         $this->updateUserForm->name = $user->name;
         $this->updateUserForm->email = $user->email;
+        $this->updateUserForm->role = $user->role;
         $this->updateUserForm->password = ''; // Don't pre-fill password
 
         Flux::modal("edit-user-{$user->id}")->show();
@@ -130,6 +147,7 @@ class UserManagement extends Component
         $data = [
             'name' => $this->updateUserForm->name,
             'email' => $this->updateUserForm->email,
+            'role' => $this->updateUserForm->role,
         ];
 
         // Only update password if provided
@@ -198,6 +216,7 @@ class UserManagement extends Component
     {
         $this->name = '';
         $this->email = '';
+        $this->role = 'regular';
         $this->password = '';
         $this->password_confirmation = '';
 

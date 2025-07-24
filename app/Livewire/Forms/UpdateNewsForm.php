@@ -13,6 +13,7 @@ class UpdateNewsForm extends Form
     public string $paragraph = '';
     public int $author_id = 0;
     public bool $is_published = false;
+    public bool $comments_enabled = true;
     public int $category_id = 0;
     public array $existing_images = [];
     public array $new_images = [];

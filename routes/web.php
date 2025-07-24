@@ -6,17 +6,20 @@ use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
 use App\Livewire\UserManagement;
+use App\Livewire\PublicHomepage;
+use App\Livewire\NewsDetail;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+// Public routes
+Route::get('/', PublicHomepage::class)->name('home');
+Route::get('/news/{news}', NewsDetail::class)->name('news.show');
 
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+// Dashboard routes (protected)
+Route::middleware(['auth', 'verified', 'dashboard'])->prefix('dashboard')->name('dashboard.')->group(function () {
+    Route::get('/', function () {
+        return view('dashboard');
+    })->name('index');
 
-Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 
     Route::get('settings/profile', Profile::class)->name('settings.profile');

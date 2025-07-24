@@ -12,12 +12,8 @@ class CategoryPolicy
      */
     public function viewAny(User $user): bool
     {
-        // For this demo, allow any authenticated user to access category management
-        // In production, you might want to check for specific roles or permissions
-        return true;
-
-        // Example with role-based access:
-        // return $user->hasRole('admin') || $user->hasPermission('manage-categories');
+        // Only admins can access category management
+        return $user->canManageCategories();
     }
 
     /**
@@ -25,8 +21,8 @@ class CategoryPolicy
      */
     public function view(User $user, Category $category): bool
     {
-        // Allow any authenticated user to view categories
-        return $this->viewAny($user);
+        // Only admins can view categories
+        return $user->canManageCategories();
     }
 
     /**
@@ -34,12 +30,8 @@ class CategoryPolicy
      */
     public function create(User $user): bool
     {
-        // For this demo, allow any authenticated user to create categories
-        // In production, you might want to check for admin role
-        return true;
-
-        // Example with role-based access:
-        // return $user->hasRole('admin') || $user->hasPermission('create-categories');
+        // Only admins can create categories
+        return $user->canManageCategories();
     }
 
     /**
@@ -47,8 +39,8 @@ class CategoryPolicy
      */
     public function update(User $user, Category $category): bool
     {
-        // Allow any authenticated user to update categories
-        return $this->viewAny($user);
+        // Only admins can update categories
+        return $user->canManageCategories();
     }
 
     /**
@@ -56,12 +48,8 @@ class CategoryPolicy
      */
     public function delete(User $user, Category $category): bool
     {
-        // For this demo, allow any authenticated user to delete categories
-        // In production, you might want to check for admin role
-        return true;
-
-        // Example with role-based access:
-        // return $user->hasRole('admin') || $user->hasPermission('delete-categories');
+        // Only admins can delete categories
+        return $user->canManageCategories();
     }
 
     /**
@@ -69,7 +57,8 @@ class CategoryPolicy
      */
     public function restore(User $user, Category $category): bool
     {
-        return $this->viewAny($user);
+        // Only admins can restore categories
+        return $user->canManageCategories();
     }
 
     /**
@@ -77,6 +66,7 @@ class CategoryPolicy
      */
     public function forceDelete(User $user, Category $category): bool
     {
-        return $this->delete($user, $category);
+        // Only admins can permanently delete categories
+        return $user->canManageCategories();
     }
 }

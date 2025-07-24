@@ -42,6 +42,8 @@ class NewsManagement extends Component
 
     public bool $is_published = false;
 
+    public bool $comments_enabled = true;
+
     #[Validate('required|exists:categories,id')]
     public int $category_id = 0;
 
@@ -73,7 +75,7 @@ class NewsManagement extends Component
                     })
             )
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->paginate(5);
     }
 
     #[Computed]
@@ -131,6 +133,7 @@ class NewsManagement extends Component
             'paragraph' => $this->paragraph,
             'author_id' => $this->author_id,
             'is_published' => $this->is_published,
+            'comments_enabled' => $this->comments_enabled,
             'category_id' => $this->category_id,
             'images' => $imagePaths,
         ]);
@@ -157,6 +160,7 @@ class NewsManagement extends Component
         $this->updateNewsForm->paragraph = $news->paragraph;
         $this->updateNewsForm->author_id = $news->author_id;
         $this->updateNewsForm->is_published = $news->is_published;
+        $this->updateNewsForm->comments_enabled = $news->comments_enabled;
         $this->updateNewsForm->category_id = $news->category_id;
         $this->updateNewsForm->existing_images = $news->images ?? [];
         $this->updateNewsForm->new_images = [];
@@ -186,6 +190,7 @@ class NewsManagement extends Component
             'paragraph' => $this->updateNewsForm->paragraph,
             'author_id' => $this->updateNewsForm->author_id,
             'is_published' => $this->updateNewsForm->is_published,
+            'comments_enabled' => $this->updateNewsForm->comments_enabled,
             'category_id' => $this->updateNewsForm->category_id,
             'images' => $allImages,
         ];
@@ -227,7 +232,7 @@ class NewsManagement extends Component
     public function togglePublished($newsId)
     {
         $news = News::findOrFail($newsId);
-        $this->authorize('update', $news);
+        $this->authorize('publish', $news);
 
         $news->update(['is_published' => !$news->is_published]);
 
@@ -270,6 +275,7 @@ class NewsManagement extends Component
         $this->paragraph = '';
         $this->author_id = Auth::id(); // Reset to current user
         $this->is_published = false;
+        $this->comments_enabled = true;
         $this->category_id = 0;
         $this->images = [];
 

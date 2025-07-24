@@ -12,12 +12,8 @@ class NewsPolicy
      */
     public function viewAny(User $user): bool
     {
-        // For this demo, allow any authenticated user to access news management
-        // In production, you might want to check for specific roles or permissions
-        return true;
-
-        // Example with role-based access:
-        // return $user->hasRole('admin') || $user->hasPermission('manage-news');
+        // Only users who can manage news can access news management
+        return $user->canManageNews();
     }
 
     /**
@@ -25,8 +21,8 @@ class NewsPolicy
      */
     public function view(User $user, News $news): bool
     {
-        // Allow any authenticated user to view news
-        return $this->viewAny($user);
+        // Allow users who can manage news to view individual news items
+        return $user->canManageNews();
     }
 
     /**
@@ -34,12 +30,8 @@ class NewsPolicy
      */
     public function create(User $user): bool
     {
-        // For this demo, allow any authenticated user to create news
-        // In production, you might want to check for author/editor role
-        return true;
-
-        // Example with role-based access:
-        // return $user->hasRole('author') || $user->hasPermission('create-news');
+        // Editors, supervisors, and admins can create news
+        return $user->canManageNews();
     }
 
     /**
@@ -47,8 +39,17 @@ class NewsPolicy
      */
     public function update(User $user, News $news): bool
     {
-        // Allow any authenticated user to update news
-        return $this->viewAny($user);
+        // Editors, supervisors, and admins can update news
+        return $user->canManageNews();
+    }
+
+    /**
+     * Determine whether the user can publish the model.
+     */
+    public function publish(User $user, News $news): bool
+    {
+        // Only supervisors and admins can publish news
+        return $user->canPublishNews();
     }
 
     /**
@@ -56,12 +57,8 @@ class NewsPolicy
      */
     public function delete(User $user, News $news): bool
     {
-        // For this demo, allow any authenticated user to delete news
-        // In production, you might want to check for admin role
-        return true;
-
-        // Example with role-based access:
-        // return $user->hasRole('admin') || $user->hasPermission('delete-news');
+        // Only admins can delete news
+        return $user->isAdmin();
     }
 
     /**
@@ -69,7 +66,8 @@ class NewsPolicy
      */
     public function restore(User $user, News $news): bool
     {
-        return $this->viewAny($user);
+        // Only admins can restore deleted news
+        return $user->isAdmin();
     }
 
     /**
@@ -77,6 +75,7 @@ class NewsPolicy
      */
     public function forceDelete(User $user, News $news): bool
     {
-        return $this->delete($user, $news);
+        // Only admins can permanently delete news
+        return $user->isAdmin();
     }
 }

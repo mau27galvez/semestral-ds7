@@ -158,10 +158,12 @@
                                             {{ __('Draft') }}
                                         </flux:badge>
                                     @endif
-                                    <button wire:click="togglePublished({{ $newsItem->id }})"
-                                        class="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200">
-                                        {{ $newsItem->is_published ? __('Unpublish') : __('Publish') }}
-                                    </button>
+                                    @can('publish', $newsItem)
+                                        <button wire:click="togglePublished({{ $newsItem->id }})"
+                                            class="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200">
+                                            {{ $newsItem->is_published ? __('Unpublish') : __('Publish') }}
+                                        </button>
+                                    @endcan
                                 </div>
                             </td>
 
@@ -253,6 +255,15 @@
                                                         :label="__('Content')" rows="6" />
                                                 </div>
 
+                                                <div class="space-y-2">
+                                                    <flux:checkbox wire:model="updateNewsForm.is_published">
+                                                        {{ __('Published') }}
+                                                    </flux:checkbox>
+                                                    <flux:checkbox wire:model="updateNewsForm.comments_enabled">
+                                                        {{ __('Comments Enabled') }}
+                                                    </flux:checkbox>
+                                                </div>
+
                                                 <div class="flex gap-3 justify-end">
                                                     <flux:modal.close>
                                                         <flux:button variant="ghost">
@@ -269,33 +280,35 @@
                                         </form>
                                     </flux:modal>
 
-                                    <flux:modal.trigger name="delete-news-{{ $newsItem->id }}">
-                                        <flux:tooltip content="{{ __('Delete News') }}">
-                                            <flux:button variant="danger" icon="trash" />
-                                        </flux:tooltip>
-                                    </flux:modal.trigger>
+                                    @can('delete', $newsItem)
+                                        <flux:modal.trigger name="delete-news-{{ $newsItem->id }}">
+                                            <flux:tooltip content="{{ __('Delete News') }}">
+                                                <flux:button variant="danger" icon="trash" />
+                                            </flux:tooltip>
+                                        </flux:modal.trigger>
 
-                                    <flux:modal name="delete-news-{{ $newsItem->id }}" class="min-w-[22rem]">
-                                        <div class="space-y-6">
-                                            <div>
-                                                <flux:heading size="lg">Delete news?</flux:heading>
-                                                <flux:text class="mt-2">
-                                                    <p>You're about to delete the news "{{ $newsItem->title }}".</p>
-                                                    <p>This action cannot be reversed.</p>
-                                                </flux:text>
+                                        <flux:modal name="delete-news-{{ $newsItem->id }}" class="min-w-[22rem]">
+                                            <div class="space-y-6">
+                                                <div>
+                                                    <flux:heading size="lg">Delete news?</flux:heading>
+                                                    <flux:text class="mt-2">
+                                                        <p>You're about to delete the news "{{ $newsItem->title }}".</p>
+                                                        <p>This action cannot be reversed.</p>
+                                                    </flux:text>
+                                                </div>
+                                                <div class="flex gap-2">
+                                                    <flux:spacer />
+                                                    <flux:modal.close>
+                                                        <flux:button variant="ghost">Cancel</flux:button>
+                                                    </flux:modal.close>
+                                                    <flux:button type="submit" variant="danger"
+                                                        wire:click="deleteNews({{ $newsItem->id }})">
+                                                        Delete news
+                                                    </flux:button>
+                                                </div>
                                             </div>
-                                            <div class="flex gap-2">
-                                                <flux:spacer />
-                                                <flux:modal.close>
-                                                    <flux:button variant="ghost">Cancel</flux:button>
-                                                </flux:modal.close>
-                                                <flux:button type="submit" variant="danger"
-                                                    wire:click="deleteNews({{ $newsItem->id }})">
-                                                    Delete news
-                                                </flux:button>
-                                            </div>
-                                        </div>
-                                    </flux:modal>
+                                        </flux:modal>
+                                    @endcan
                                 </div>
                             </td>
                         </tr>
@@ -358,9 +371,12 @@
                             @endforeach
                         </flux:select>
 
-                        <div>
+                        <div class="space-y-2">
                             <flux:checkbox wire:model="is_published">
                                 {{ __('Published') }}
+                            </flux:checkbox>
+                            <flux:checkbox wire:model="comments_enabled">
+                                {{ __('Comments Enabled') }}
                             </flux:checkbox>
                         </div>
                     </div>

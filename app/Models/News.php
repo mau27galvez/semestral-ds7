@@ -22,6 +22,8 @@ class News extends Model
         'author_id',
         'is_published',
         'category_id',
+        'views_count',
+        'comments_enabled',
     ];
 
     /**
@@ -34,6 +36,7 @@ class News extends Model
         return [
             'images' => 'array',
             'is_published' => 'boolean',
+            'comments_enabled' => 'boolean',
         ];
     }
 
@@ -51,6 +54,74 @@ class News extends Model
     public function author()
     {
         return $this->belongsTo(User::class, 'author_id');
+    }
+
+    /**
+     * Get the comments for the news.
+     */
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+
+    /**
+     * Get the active comments for the news.
+     */
+    public function activeComments()
+    {
+        return $this->hasMany(Comment::class)->where('is_active', true);
+    }
+
+    /**
+     * Get the likes for the news.
+     */
+    public function likes()
+    {
+        return $this->hasMany(NewsLike::class);
+    }
+
+    /**
+     * Get the users who liked the news.
+     */
+    public function likedByUsers()
+    {
+        return $this->belongsToMany(User::class, 'news_likes');
+    }
+
+    /**
+     * Check if a user liked this news.
+     */
+    public function isLikedBy($user)
+    {
+        if (!$user) {
+            return false;
+        }
+
+        return $this->likes()->where('user_id', $user->id)->exists();
+    }
+
+    /**
+     * Get the likes count.
+     */
+    public function getLikesCountAttribute()
+    {
+        return $this->likes()->count();
+    }
+
+    /**
+     * Get the active comments count.
+     */
+    public function getActiveCommentsCountAttribute()
+    {
+        return $this->activeComments()->count();
+    }
+
+    /**
+     * Increment the views count.
+     */
+    public function incrementViews()
+    {
+        $this->increment('views_count');
     }
 
     /**

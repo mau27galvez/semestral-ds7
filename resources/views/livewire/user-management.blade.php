@@ -81,6 +81,10 @@
                         </th>
                         <th
                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            {{ __('Role') }}
+                        </th>
+                        <th
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                             {{ __('Created') }}
                         </th>
                         <th
@@ -119,6 +123,20 @@
 
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                                 {{ $user->email }}
+                            </td>
+
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @php
+                                    $roleColors = [
+                                        'admin' => 'red',
+                                        'supervisor' => 'blue',
+                                        'editor' => 'green',
+                                        'regular' => 'gray',
+                                    ];
+                                @endphp
+                                <flux:badge color="{{ $roleColors[$user->role] ?? 'gray' }}">
+                                    {{ $user->getRoleDisplayName() }}
+                                </flux:badge>
                             </td>
 
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
@@ -164,6 +182,14 @@
 
                                                     <flux:input wire:model="updateUserForm.email"
                                                         :label="__('Email')" />
+
+                                                    <flux:select wire:model="updateUserForm.role"
+                                                        :label="__('Role')">
+                                                        @foreach ($this->availableRoles as $roleValue => $roleLabel)
+                                                            <flux:select.option value="{{ $roleValue }}">
+                                                                {{ __($roleLabel) }}</flux:select.option>
+                                                        @endforeach
+                                                    </flux:select>
 
                                                     <flux:input wire:model="updateUserForm.password"
                                                         :label="__('New Password')" type="password" />
@@ -227,7 +253,7 @@
         </tr>
     @empty
         <tr>
-            <td colspan="5" class="px-6 py-12 text-center">
+            <td colspan="6" class="px-6 py-12 text-center">
                 <div class="text-gray-500 dark:text-gray-400">
                     @if ($search)
                         {{ __('No users found matching ":search"', ['search' => $search]) }}
@@ -265,6 +291,12 @@
                 <flux:input wire:model="name" :label="__('Name')" />
 
                 <flux:input wire:model="email" :label="__('Email')" />
+
+                <flux:select wire:model="role" :label="__('Role')">
+                    @foreach ($this->availableRoles as $roleValue => $roleLabel)
+                        <flux:select.option value="{{ $roleValue }}">{{ __($roleLabel) }}</flux:select.option>
+                    @endforeach
+                </flux:select>
 
                 <flux:input wire:model="password" :label="__('Password')" type="password" />
 

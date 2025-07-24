@@ -11,12 +11,8 @@ class UserPolicy
      */
     public function viewAny(User $user): bool
     {
-        // For this demo, allow any authenticated user to access user management
-        // In production, you might want to check for specific roles or permissions
-        return true;
-
-        // Example with role-based access:
-        // return $user->hasRole('admin') || $user->hasPermission('manage-users');
+        // Only admins can access user management
+        return $user->canManageUsers();
     }
 
     /**
@@ -24,8 +20,8 @@ class UserPolicy
      */
     public function view(User $user, User $model): bool
     {
-        // Users can view their own profile or if they have admin access
-        return $user->id === $model->id || $this->viewAny($user);
+        // Users can view their own profile or if they are admins
+        return $user->id === $model->id || $user->canManageUsers();
     }
 
     /**
@@ -33,12 +29,8 @@ class UserPolicy
      */
     public function create(User $user): bool
     {
-        // For this demo, allow any authenticated user to create users
-        // In production, you might want to check for admin role
-        return true;
-
-        // Example with role-based access:
-        // return $user->hasRole('admin') || $user->hasPermission('create-users');
+        // Only admins can create users
+        return $user->canManageUsers();
     }
 
     /**
@@ -46,8 +38,8 @@ class UserPolicy
      */
     public function update(User $user, User $model): bool
     {
-        // Users can update their own profile or if they have admin access
-        return $user->id === $model->id || $this->viewAny($user);
+        // Users can update their own profile or admins can update any user
+        return $user->id === $model->id || $user->canManageUsers();
     }
 
     /**
@@ -60,12 +52,8 @@ class UserPolicy
             return false;
         }
 
-        // For this demo, allow any authenticated user to delete other users
-        // In production, you might want to check for admin role
-        return true;
-
-        // Example with role-based access:
-        // return $user->hasRole('admin') || $user->hasPermission('delete-users');
+        // Only admins can delete other users
+        return $user->canManageUsers();
     }
 
     /**
@@ -73,7 +61,8 @@ class UserPolicy
      */
     public function restore(User $user, User $model): bool
     {
-        return $this->viewAny($user);
+        // Only admins can restore users
+        return $user->canManageUsers();
     }
 
     /**
@@ -81,6 +70,7 @@ class UserPolicy
      */
     public function forceDelete(User $user, User $model): bool
     {
-        return $this->delete($user, $model);
+        // Only admins can permanently delete users
+        return $user->canManageUsers();
     }
 }
