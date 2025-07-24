@@ -102,6 +102,19 @@ class CategoryManagement extends Component
         $this->dispatch('category-created', name: $this->name);
     }
 
+    public function editCategory($categoryId)
+    {
+        $category = Category::findOrFail($categoryId);
+        $this->authorize('update', $category);
+
+        // Populate the form with existing data
+        $this->updateCategoryForm->id = $category->id;
+        $this->updateCategoryForm->name = $category->name;
+        $this->updateCategoryForm->slug = $category->slug;
+
+        Flux::modal("edit-category-{$category->id}")->show();
+    }
+
     public function updateCategory($categoryId)
     {
         $this->updateCategoryForm->id = $categoryId;
@@ -124,6 +137,8 @@ class CategoryManagement extends Component
         // Livewire-native success message
         $this->successMessage = "Category '{$categoryName}' updated successfully!";
         $this->clearMessagesAfterDelay();
+
+        Flux::modal("edit-category-{$category->id}")->close();
 
         $this->dispatch('category-updated', name: $categoryName);
     }

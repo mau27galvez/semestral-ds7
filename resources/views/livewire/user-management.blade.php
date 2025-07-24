@@ -141,11 +141,9 @@
 
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex items-center space-x-2">
-                                    <flux:modal.trigger name="edit-user-{{ $user->id }}">
-                                        <flux:tooltip content="{{ __('Edit User') }}">
-                                            <flux:button icon="pencil" />
-                                        </flux:tooltip>
-                                    </flux:modal.trigger>
+                                    <flux:tooltip content="{{ __('Edit User') }}">
+                                        <flux:button icon="pencil" wire:click="editUser({{ $user->id }})" />
+                                    </flux:tooltip>
 
                                     {{-- Edit User Modal --}}
                                     <flux:modal name="edit-user-{{ $user->id }}" class="w-full max-w-xl">

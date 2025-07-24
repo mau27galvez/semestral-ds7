@@ -105,6 +105,20 @@ class UserManagement extends Component
         $this->dispatch('user-created', name: $this->name);
     }
 
+    public function editUser($userId)
+    {
+        $user = User::findOrFail($userId);
+        $this->authorize('update', $user);
+
+        // Populate the form with existing data
+        $this->updateUserForm->id = $user->id;
+        $this->updateUserForm->name = $user->name;
+        $this->updateUserForm->email = $user->email;
+        $this->updateUserForm->password = ''; // Don't pre-fill password
+
+        Flux::modal("edit-user-{$user->id}")->show();
+    }
+
     public function updateUser($userId)
     {
         $this->updateUserForm->id = $userId;
@@ -132,6 +146,8 @@ class UserManagement extends Component
         // Livewire-native success message
         $this->successMessage = "User '{$userName}' updated successfully!";
         $this->clearMessagesAfterDelay();
+
+        Flux::modal("edit-user-{$user->id}")->close();
 
         $this->dispatch('user-updated', name: $userName);
     }

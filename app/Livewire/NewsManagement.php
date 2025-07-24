@@ -133,6 +133,24 @@ class NewsManagement extends Component
         $this->dispatch('news-created', title: $this->title);
     }
 
+    public function editNews($newsId)
+    {
+        $news = News::findOrFail($newsId);
+        $this->authorize('update', $news);
+
+        // Populate the form with existing data
+        $this->updateNewsForm->id = $news->id;
+        $this->updateNewsForm->title = $news->title;
+        $this->updateNewsForm->paragraph = $news->paragraph;
+        $this->updateNewsForm->author = $news->author;
+        $this->updateNewsForm->is_published = $news->is_published;
+        $this->updateNewsForm->category_id = $news->category_id;
+        $this->updateNewsForm->existing_images = $news->images ?? [];
+        $this->updateNewsForm->new_images = [];
+
+        Flux::modal("edit-news-{$news->id}")->show();
+    }
+
     public function updateNews($newsId)
     {
         $this->updateNewsForm->id = $newsId;
@@ -169,6 +187,7 @@ class NewsManagement extends Component
         $this->successMessage = "News '{$newsTitle}' updated successfully!";
         $this->clearMessagesAfterDelay();
 
+        Flux::modal("edit-news-{$news->id}")->close();
         $this->dispatch('news-updated', title: $newsTitle);
     }
 
