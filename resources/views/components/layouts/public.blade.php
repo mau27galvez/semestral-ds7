@@ -9,33 +9,27 @@
     <flux:header container class="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
         <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
-        <a href="{{ route('dashboard.index') }}" class="ms-2 me-5 flex items-center space-x-2 rtl:space-x-reverse lg:ms-0"
-            wire:navigate>
-            <x-app-logo />
-        </a>
-
-        <flux:navbar class="-mb-px max-lg:hidden">
-            <flux:navbar.item icon="layout-grid" :href="route('dashboard.index')"
-                :current="request()->routeIs('dashboard')" wire:navigate>
-                {{ __('Dashboard') }}
-            </flux:navbar.item>
-        </flux:navbar>
+        @if (Auth::user()->canAccessDashboard())
+            <flux:navbar class="-mb-px max-lg:hidden">
+                <flux:navbar.item icon="layout-grid" :href="route('dashboard.index')"
+                    :current="request()->routeIs('dashboard')" wire:navigate>
+                    {{ __('Dashboard') }}
+                </flux:navbar.item>
+            </flux:navbar>
+        @endif
 
         <flux:spacer />
 
         <flux:navbar class="me-1.5 space-x-0.5 rtl:space-x-reverse py-0!">
-            <flux:tooltip :content="__('Search')" position="bottom">
-                <flux:navbar.item class="!h-10 [&>div>svg]:size-5" icon="magnifying-glass" href="#"
-                    :label="__('Search')" />
-            </flux:tooltip>
-            <flux:tooltip :content="__('Repository')" position="bottom">
-                <flux:navbar.item class="h-10 max-lg:hidden [&>div>svg]:size-5" icon="folder-git-2"
-                    href="https://github.com/laravel/livewire-starter-kit" target="_blank" :label="__('Repository')" />
-            </flux:tooltip>
-            <flux:tooltip :content="__('Documentation')" position="bottom">
-                <flux:navbar.item class="h-10 max-lg:hidden [&>div>svg]:size-5" icon="book-open-text"
-                    href="https://laravel.com/docs/starter-kits#livewire" target="_blank" label="Documentation" />
-            </flux:tooltip>
+            @php
+                $categories = \App\Models\Category::all();
+            @endphp
+            @foreach ($categories as $category)
+                <flux:navbar.item class="h-10 max-lg:hidden [&>div>svg]:size-5" icon="folder"
+                    :href="route('categories.show', $category->id)" :label="$category->name" wire:navigate>
+                    {{ $category->name }}
+                </flux:navbar.item>
+            @endforeach
         </flux:navbar>
 
         <!-- Desktop User Menu -->
@@ -64,7 +58,8 @@
                 <flux:menu.separator />
 
                 <flux:menu.radio.group>
-                    <flux:menu.item :href="route('settings.profile')" icon="cog" wire:navigate>{{ __('Settings') }}
+                    <flux:menu.item :href="route('settings.profile')" icon="cog" wire:navigate>
+                        {{ __('Settings') }}
                     </flux:menu.item>
                 </flux:menu.radio.group>
 
@@ -118,7 +113,9 @@
         </flux:navlist>
     </flux:sidebar>
 
-    {{ $slot }}
+    <flux:main>
+        {{ $slot }}
+    </flux:main>
 
     @fluxScripts
 </body>

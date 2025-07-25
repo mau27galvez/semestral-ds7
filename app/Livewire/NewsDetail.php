@@ -113,6 +113,7 @@ class NewsDetail extends Component
     {
         $comment = Comment::findOrFail($commentId);
 
+        /** @var User $user */
         $user = Auth::user();
 
         // Only admins and supervisors can moderate comments

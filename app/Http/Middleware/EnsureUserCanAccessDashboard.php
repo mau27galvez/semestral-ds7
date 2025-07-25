@@ -22,7 +22,7 @@ class EnsureUserCanAccessDashboard
         }
 
         // Check if user can access dashboard (not regular user)
-        if (!Auth::user()->canAccessDashboard()) {
+        if (!$request->user()->canAccessDashboard()) {
             // Redirect regular users to the home page with a message
             return redirect()->route('home')->with('error', 'You do not have permission to access the dashboard.');
         }

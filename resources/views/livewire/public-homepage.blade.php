@@ -36,9 +36,9 @@
             <p class="mt-4 text-lg text-gray-600 dark:text-gray-300">Stay informed with our most recent stories</p>
         </div>
 
-        @if ($this->latestNews->count() > 0)
+        @if ($this->news->count() > 0)
             <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-                @foreach ($this->latestNews as $news)
+                @foreach ($this->news as $news)
                     <article
                         class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
                         @if ($news->first_image)
