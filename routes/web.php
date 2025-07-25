@@ -16,6 +16,7 @@ Route::get('/', PublicHomepage::class)->name('home');
 Route::get('/news/{news}', NewsDetail::class)->name('news.show');
 Route::get('/categories/{category}', NewsCategory::class)->name('categories.show');
 
+// auth
 Route::redirect('settings', 'settings/profile');
 
 Route::get('settings/profile', Profile::class)->name('settings.profile');
